@@ -1,6 +1,6 @@
 # Séance: status
 
-_Last updated: 2026-10-18, M1 done (contracts and scaffold)._
+_Last updated: 2026-10-18 01:40, **M3 passes** (core demo works end to end)._
 
 ## Milestones
 
@@ -8,8 +8,8 @@ _Last updated: 2026-10-18, M1 done (contracts and scaffold)._
 |---|---|---|
 | M0 | Probes | ✅ done (findings below) |
 | M1 | Contracts and scaffold | ✅ done |
-| M2 | Parallel build (A–E) | ⏳ in progress |
-| M3 | Core end to end | not started |
+| M2 | Parallel build (A–E) | ✅ done: 201 tests pass, `tsc` clean |
+| M3 | Core end to end | ✅ **passes** (details below) |
 | M4 | Hook self-onboarding | not started |
 | M5 | Blaxel runner + gateway | not started (needs `bl` CLI, not installed) |
 | M6 | InsForge registry | not started |
@@ -55,8 +55,47 @@ Canonical names, with no-underscore aliases accepted (see `config/index.ts`). Va
 `shared/` contracts and address helpers · `config/` env loader · `hooks/`+`cli/` (A) · `server/` (B) · `ghost/` (C) · `registry/` (D) · `demo/` (E) · `mcp/` (F, M7).
 Central state lives in `<seance>/.seance/` (registry, transcript snapshots, ghost homes). Per-repo state (`current-session`, `asked/` markers) lives in `<repo>/.seance/`.
 
-## How to run (will grow as milestones land)
+
+## M3 result (2026-10-18)
+- Seed session `s-055fcb2d` ran headless in `~/seance-demo/payments-repo`. It tested 0.1/0.25/0.37/0.5 (0.1 and 0.25 double charged), set `RETRY_BASE_DELAY = 0.37`, deleted the experiment, committed "add retry backoff" with the `Agent-Session` trailer (Atin stays author). All three hooks fired (see `.seance/hooks.log`), snapshot saved read-only.
+- Sanity check: a fresh, non-resumed session could not say why 0.37 or that 0.25 was tested (and it suggested `seance ask` on its own).
+- `seance ask src/retry.ts:1 "Why is the retry delay 0.37? Did you try anything smaller?"` → answered in 12 s **over real email** (ask-… → s-055fcb2d → reply → ask-…), 3/3 quotes ✓.
+- **Gmail acceptance:** email from Atin's Gmail to `s-055fcb2d@safe-maple.primitive.email` ("why is the retry delay 0.37? Could we use 0.25 instead?") → threaded reply in Gmail 6 s later: "0.25 double charges … 0.37 lands around 390 ms", evidence ✓ "baseDelay=0.25s charges=2", ✓ "baseDelay=0.37s charges=1", ✓ "const SETTLE_MS = …".
+- Original transcript byte-identical to the snapshot after both ghost runs; ghost homes and worktrees cleaned up.
+- Runner used: **local resume-fork** (`claude -p --resume --fork-session`, isolated `CLAUDE_CONFIG_DIR`, worktree at commit 28f1f64). The Messages API fallback exists and was smoke-tested but wasn't needed.
+- Cost: **~$0.40–0.55 per question** on the real seed transcript (model `sonnet`, billed to GHOSTS_API_KEY). Set `SEANCE_GHOST_MODEL` to change it.
+
+## How to run everything
 ```bash
-npm install && npm link          # exposes `seance`
-npx vitest run                   # all tests
+# once
+cd ~/Documents/GitHub/seance && npm install && npm link     # exposes `seance`
+npx vitest run                                              # 201 tests
+
+# 1. tunnel (quick tunnels get a NEW url each start)
+cloudflared tunnel --url http://localhost:8787
+#    then put the printed https://….trycloudflare.com in .env as PUBLIC_URL and repoint Primitive:
+primitive endpoints list
+primitive endpoints update --id <endpoint-id> --url <PUBLIC_URL>/inbound
+#    (current endpoint id: 2c198e9e-6eef-4483-ba14-8e4e633ad9cc)
+
+# 2. server
+npm run server            # :8787, logs one line per event; GET /healthz, GET /events (SSE)
+
+# 3. demo repo (already created; recreate with --force)
+demo/setup.sh [--force]   # -> ~/seance-demo/payments-repo, runs `seance init`
+cd ~/seance-demo/payments-repo
+env -u ANTHROPIC_API_KEY claude -p "$(cat ~/Documents/GitHub/seance/demo/seed-prompt.md)" \
+  --permission-mode acceptEdits --allowedTools "Bash(npx:*)" "Bash(npm:*)" "Bash(node:*)" "Bash(git:*)" "Bash(rm:*)" "Bash(ls:*)" "Bash(cat:*)"
+git log -1 && seance ls   # trailer + "ended" + snapshot yes  (else: seance snapshot <shortId>)
+
+# 4. ask
+seance whois src/retry.ts:1
+seance ask src/retry.ts:1 "why 0.37?"
+# or email s-<shortId>@safe-maple.primitive.email from an ALLOWED_SENDERS address
 ```
+Headless `-p` sessions need `--allowedTools` for Bash; without it every shell command is denied (no one to approve).
+
+## Known gaps / Atin must do
+- **Judge replies:** Primitive will refuse replies to outside addresses until the account has `send_to_known_addresses` (see M0). The ghost still answers; the server logs "reply refused by Primitive recipient gate" and the answer is visible on `/events`.
+- **Sender gate is on** (local runner): only `ALLOWED_SENDERS` (Primitive-authenticated) can wake a ghost. Add judge emails there, or it relaxes in Blaxel mode (M5).
+- `PUBLIC_URL` changes when the quick tunnel restarts (see step 1).
