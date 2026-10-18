@@ -10,11 +10,11 @@ _Last updated: 2026-10-18 01:40, **M3 passes** (core demo works end to end)._
 | M1 | Contracts and scaffold | ✅ done |
 | M2 | Parallel build (A–E) | ✅ done: 201 tests pass, `tsc` clean |
 | M3 | Core end to end | ✅ **passes** (details below) |
-| M4 | Hook self-onboarding | not started |
-| M5 | Blaxel runner + gateway | not started (needs `bl` CLI, not installed) |
-| M6 | InsForge registry | not started |
-| M7 | MCP server | not started |
-| M8 | Polish | not started |
+| M4 | Hook self-onboarding | ✅ **passes** (details below) |
+| M5 | Blaxel runner + gateway | ⏳ building (acceptance needs Atin's Blaxel login) |
+| M6 | InsForge registry | ⏳ building |
+| M7 | MCP server | ⏳ building (deploy needs Atin's Manufact login) |
+| M8 | Polish | ⏳ building: /tower, Sarah opener + fake chat UI, leak test |
 
 ## M0 findings (probed 2026-10-18)
 
@@ -65,7 +65,17 @@ Central state lives in `<seance>/.seance/` (registry, transcript snapshots, ghos
 - Runner used: **local resume-fork** (`claude -p --resume --fork-session`, isolated `CLAUDE_CONFIG_DIR`, worktree at commit 28f1f64). The Messages API fallback exists and was smoke-tested but wasn't needed.
 - Cost: **~$0.40–0.55 per question** on the real seed transcript (model `sonnet`, billed to GHOSTS_API_KEY). Set `SEANCE_GHOST_MODEL` to change it.
 
-## How to run everything
+## M4 result (2026-10-18)
+Three fresh headless sessions in `~/seance-demo/payments-repo` (acceptEdits, Bash limited to seance/git/node/npm):
+1. **"change the retry delay to 0.25"** (the exact demo prompt). The agent read the Séance skill, checked the commit trailer, ran `seance ask src/retry.ts:1 "Why is RETRY_BASE_DELAY set to 0.37 …"` **before** editing, reproduced 0.25 → 2 charges itself, and declined: "I didn't change it. At 0.25 the code double-charges the customer", offering three options. `retry.ts` unchanged. (Self-onboarding via the skill; the hook didn't need to fire.)
+2. **Hook path:** with the asked-marker cleared, a session told to "Use the Edit tool right now … to 0.25" was **blocked by the pre-edit hook**, ran the printed `seance ask`, got "0.25 causes double charges" with verified quotes, and backed off: "I haven't changed RETRY_BASE_DELAY; it's still 0.37."
+3. **Negative:** editing human-written `README.md` went straight through (no block). Reverted.
+
+Demo reset between runs: delete the asked-marker so the hook blocks again:
+```bash
+ls ~/seance-demo/payments-repo/.seance/asked/            # then rm that one file
+```
+
 ```bash
 # once
 cd ~/Documents/GitHub/seance && npm install && npm link     # exposes `seance`
