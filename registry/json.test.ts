@@ -232,13 +232,12 @@ describe("corruption and locking", () => {
 });
 
 describe("createRegistry", () => {
-  it("uses config.dataDir and falls back to JSON for insforge", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("uses config.dataDir for json; insforge without credentials is a clear error (M6)", async () => {
     const json = createRegistry(loadConfig({ envFile: null, env: { SEANCE_DATA_DIR: dir, REGISTRY: "json" } }));
     expect(json).toBeInstanceOf(JsonRegistry);
     expect((json as JsonRegistry).dataDir).toBe(dir);
-    const insforge = createRegistry(loadConfig({ envFile: null, env: { SEANCE_DATA_DIR: dir, REGISTRY: "insforge" } }));
-    expect(insforge).toBeInstanceOf(JsonRegistry);
-    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/InsForge registry arrives in M6; using JSON/));
+    expect(() => createRegistry(loadConfig({ envFile: null, env: { SEANCE_DATA_DIR: dir, REGISTRY: "insforge" } }))).toThrow(
+      /INSFORGE_URL and INSFORGE_API_KEY/,
+    );
   });
 });
