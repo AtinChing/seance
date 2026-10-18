@@ -19,7 +19,9 @@ if [ -z "${DRY_RUN:-}" ] && ! npx --no-install mcp-use whoami >/dev/null 2>&1; t
   exit 1
 fi
 
-TMP="$(mktemp -t seance-mcp-env.XXXXXX)"
+# mcp-use wants a relative --env-file inside the project. Its upload skips any file named .env*, and
+# .env.* is also gitignored here, so this temp file is never part of the deployed source.
+TMP="$(mktemp .env.deploy.XXXXXX)"
 chmod 600 "$TMP"
 trap 'rm -f "$TMP"' EXIT
 
