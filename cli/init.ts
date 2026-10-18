@@ -56,7 +56,23 @@ export function mergeSettings(settings: Record<string, unknown>, cmd: string = C
       changes.push(`added ${w.event} hook (seance hook ${w.name})`);
     }
   }
+  // Asking a ghost is read-only for this repo, so pre-approve it: the agent the pre-edit hook stops
+  // can run the command it was told to run without a human approving each prompt.
+  if (!settings.permissions || typeof settings.permissions !== "object" || Array.isArray(settings.permissions)) settings.permissions = {};
+  const perms = settings.permissions as Record<string, unknown>;
+  if (!Array.isArray(perms.allow)) perms.allow = [];
+  const allow = perms.allow as unknown[];
+  for (const rule of allowRules(cmd)) {
+    if (allow.includes(rule)) continue;
+    allow.push(rule);
+    changes.push(`allowed ${rule}`);
+  }
   return changes;
+}
+
+/** Permission rules for the read-only Séance commands, on PATH and via the absolute launcher. */
+export function allowRules(cmd: string = CLI_COMMAND): string[] {
+  return ["seance ask", "seance whois", `${cmd} ask`, `${cmd} whois`].map((c) => `Bash(${c}:*)`);
 }
 
 function writeIfChanged(file: string, content: string): "created" | "updated" | "unchanged" {

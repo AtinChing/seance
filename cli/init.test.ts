@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { CLI_COMMAND, currentSessionFile } from "../hooks/common.ts";
 import { cleanEnv, DOMAIN, SESSION_A, TempRepo, tmpDir } from "../hooks/test-helpers.ts";
 import { memoryIo } from "./io.ts";
-import { GIT_HOOK_MARKER, mergeSettings } from "./init.ts";
+import { allowRules, GIT_HOOK_MARKER, mergeSettings } from "./init.ts";
 import { runCli } from "./main.ts";
 
 let repo: TempRepo;
@@ -32,7 +32,11 @@ describe("seance init", () => {
         SessionEnd: [{ hooks: [{ type: "command", command: `${CLI_COMMAND} hook session-end` }] }],
         PreToolUse: [{ matcher: "Edit|MultiEdit|Write", hooks: [{ type: "command", command: `${CLI_COMMAND} hook pre-edit` }] }],
       },
+      permissions: { allow: allowRules(CLI_COMMAND) },
     });
+    expect(allowRules(CLI_COMMAND)).toEqual([
+      "Bash(seance ask:*)", "Bash(seance whois:*)", `Bash(${CLI_COMMAND} ask:*)`, `Bash(${CLI_COMMAND} whois:*)`,
+    ]);
     const files = [".claude/settings.json", ".gitignore", "CLAUDE.md", ".claude/skills/seance/SKILL.md", ".git/hooks/prepare-commit-msg"];
     const before = files.map((f) => repo.read(f));
     const again = await init();
@@ -55,7 +59,8 @@ describe("seance init", () => {
     await init();
     const s = settings();
     expect(s.model).toBe("opus");
-    expect(s.permissions).toEqual(foreign.permissions);
+    // Foreign rules are kept first; Séance's read-only commands are appended once, even after two inits.
+    expect(s.permissions).toEqual({ allow: ["Bash(npm test)", ...allowRules(CLI_COMMAND)] });
     expect(s.hooks.Stop).toEqual(foreign.hooks.Stop);
     expect(s.hooks.PreToolUse).toHaveLength(2);
     expect(s.hooks.PreToolUse[0]).toEqual(foreign.hooks.PreToolUse[0]);
