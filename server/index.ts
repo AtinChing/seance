@@ -7,12 +7,15 @@ import { describeEvent, EventBus } from "./events.ts";
 import { PrimitiveMailer, type ServerMailer } from "./mailer.ts";
 import { registerTowerRoutes } from "./tower.ts";
 import { registerMcpSupportRoutes } from "./mcp-support.ts";
+import { registerLlmRoutes, TokenStore } from "./llm.ts";
 
 const config = getConfig();
 requireConfig(config, "primitiveDomain");
 
 const registry = createRegistry(config);
-const runner = createGhostRunner(config);
+// Per-run tokens for the /llm gateway: Blaxel sandboxes never see GHOSTS_API_KEY.
+const tokens = new TokenStore();
+const runner = createGhostRunner(config, { tokens });
 
 const mailer: ServerMailer = config.primitiveApiKey
   ? new PrimitiveMailer({ apiKey: config.primitiveApiKey })
@@ -27,6 +30,7 @@ bus.on((e) => console.log(`[event] ${describeEvent(e)}`));
 const app = createApp({ config, registry, runner, mailer, bus });
 registerTowerRoutes(app, { recentQuestions: () => app.recentQuestions(), bus, config, registry });
 registerMcpSupportRoutes(app, { config, registry });
+registerLlmRoutes(app, { config, tokens });
 
 const askMode = config.raw.SEANCE_ASK_MODE === "in-process" || !config.primitiveApiKey || !config.publicUrl ? "in-process" : "email";
 
