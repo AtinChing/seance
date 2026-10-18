@@ -4,7 +4,8 @@ set -euo pipefail
 DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SEANCE_DIR="$(cd "$DEMO_DIR/.." && pwd)"
 TEMPLATE="$DEMO_DIR/payments-template"
-REPO="$DEMO_DIR/payments-repo"
+# Outside the seance tree by default, so a fresh agent in the demo repo cannot find the answer in SPEC.md.
+REPO="${SEANCE_DEMO_REPO:-$HOME/seance-demo/payments-repo}"
 SEANCE_BIN="$SEANCE_DIR/cli/bin.js"
 
 force=0
@@ -26,6 +27,7 @@ fi
 
 git_plain() { env -u CLAUDECODE git "$@"; }
 
+mkdir -p "$(dirname "$REPO")"
 cp -R "$TEMPLATE" "$REPO"
 cd "$REPO"
 git_plain init -q -b main
@@ -54,7 +56,7 @@ cat <<NEXT
 
 Next steps:
   cd "$REPO"
-  claude -p "\$(cat ../seed-prompt.md)" --permission-mode acceptEdits
+  claude -p "\$(cat $DEMO_DIR/seed-prompt.md)" --permission-mode acceptEdits
   git log -1
   seance ls
 See demo/README.md for the full run order.

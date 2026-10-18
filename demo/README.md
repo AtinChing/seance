@@ -1,6 +1,6 @@
 # Demo: payments repo
 
-`payments-template/` is the source. `payments-repo/` is generated from it as its own git repo and is gitignored here.
+`payments-template/` is the source. `setup.sh` generates `~/seance-demo/payments-repo` from it as its own git repo (override with `SEANCE_DEMO_REPO`). It lives outside the seance tree on purpose, so an agent working in it cannot read the answer in SPEC.md.
 
 ## 1. Create the repo
 
@@ -15,8 +15,8 @@ This copies the template, runs `git init`, `npm install`, commits "payments scaf
 Run it as its own top-level Claude Code process with your normal login. Never with an API key in the env (`unset ANTHROPIC_API_KEY GHOSTS_API_KEY` first if in doubt).
 
 ```bash
-cd demo/payments-repo
-claude -p "$(cat ../seed-prompt.md)" --permission-mode acceptEdits
+cd ~/seance-demo/payments-repo
+claude -p "$(cat ~/Documents/GitHub/seance/demo/seed-prompt.md)" --permission-mode acceptEdits
 ```
 
 ## 3. Check
@@ -38,7 +38,7 @@ claude -p "why is RETRY_BASE_DELAY 0.37?"
 
 ## 5. Demo (M4)
 
-Fresh Claude Code session in `demo/payments-repo`, type only:
+Fresh Claude Code session in `~/seance-demo/payments-repo`, type only:
 
 ```
 change the retry delay to 0.25
