@@ -565,7 +565,8 @@ details.tests pre { margin: 0.6rem 0 0; padding: 0.8rem; border-radius: 10px; ba
   }, 1000);
   // Belt and braces: poll slowly, faster when the stream is down.
   setInterval(() => { if (!es || es.readyState !== EventSource.OPEN) refresh(); }, 5000);
-  setInterval(refresh, 30000);
+  // Proxies (e.g. Cloudflare quick tunnels) can hold SSE events back; a cheap poll keeps the screen current.
+  setInterval(refresh, 3000);
 
   refresh();
   connect();
