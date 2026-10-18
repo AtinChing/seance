@@ -61,6 +61,26 @@ describe("/inbound auth", () => {
   });
 });
 
+describe("sandbox test output in replies", () => {
+  it("includes clean test output from a blaxel ghost", async () => {
+    const runner = new FakeRunner(() => ghostResult({ runner: "blaxel", testOutput: "✔ a customer is charged exactly once\n(npm test exited 0)" }));
+    const t = build({ runner });
+    await postSigned(t.app, makeEvent());
+    await t.app.drain();
+    expect(t.mailer.replies[0].text).toContain("The ghost re-ran the tests in its sandbox:");
+    expect(t.mailer.replies[0].text).toContain("charged exactly once");
+  });
+  it("drops test output that contains a secret, but still answers", async () => {
+    const runner = new FakeRunner(() => ghostResult({ runner: "blaxel", testOutput: `env dump: ${API_KEY}` }));
+    const t = build({ runner });
+    await postSigned(t.app, makeEvent());
+    await t.app.drain();
+    expect(t.mailer.replies).toHaveLength(1);
+    expect(t.mailer.replies[0].text).not.toContain(API_KEY);
+    expect(t.mailer.replies[0].text).not.toContain("re-ran the tests");
+  });
+});
+
 describe("ghost pipeline", () => {
   it("answers in thread with the spec format and the full event sequence", async () => {
     const t = build();

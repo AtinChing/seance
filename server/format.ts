@@ -6,6 +6,8 @@ export interface ReplyParts {
   shortId: string;
   commit?: string | null;
   durationMs: number;
+  runner?: "local" | "blaxel";
+  testOutput?: string;       // blaxel mode: tail of the ghost's `npm test` re-run (already secret-scanned)
 }
 
 /** Reply body in the spec 6.5 format. Quotes must already be filtered/capped. */
@@ -18,10 +20,15 @@ export function formatReply(p: ReplyParts): string {
     }
     lines.push("");
   }
+  if (p.testOutput?.trim()) {
+    lines.push("The ghost re-ran the tests in its sandbox:");
+    for (const l of p.testOutput.trim().split("\n").slice(-12)) lines.push(`  ${l}`);
+    lines.push("");
+  }
   const secs = Math.max(0, Math.round(p.durationMs / 1000));
   const footer = [`Session s-${p.shortId}`];
   if (p.commit) footer.push(`commit ${p.commit.slice(0, 7)}`);
-  footer.push(`answered by a disposable fork in ${secs}s`);
+  footer.push(`answered by a disposable fork${p.runner === "blaxel" ? " in a throwaway sandbox" : ""} in ${secs}s`);
   lines.push(footer.join(" · "));
   lines.push("The original session was not modified.");
   return lines.join("\n");

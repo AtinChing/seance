@@ -9,7 +9,7 @@ import type { GhostRunner, Registry } from "../shared/interfaces.ts";
 import type { GhostResult, InboundEmail, QuestionRecord, SeanceEvent } from "../shared/types.ts";
 import { EventBus } from "./events.ts";
 import { maskSender } from "./tower.ts";
-import { BLOCKED_NOTICE, filterReply } from "./filter.ts";
+import { BLOCKED_NOTICE, filterReply, scanText } from "./filter.ts";
 import { formatReply, NOTICES, replySubject } from "./format.ts";
 import { normalizeInbound, parseAbout, safeEqual, verifyPrimitiveSignature, type InboundMessage, type PrimitiveEvent } from "./inbound.ts";
 import { isRecipientNotAllowed, type ServerMailer } from "./mailer.ts";
@@ -227,7 +227,11 @@ export function createApp(deps: AppDeps): SeanceApp {
     const stored: GhostResult = { ...result, answer: filtered.answer, quotes: filtered.quotes };
     const text = filtered.blocked
       ? BLOCKED_NOTICE
-      : formatReply({ answer: filtered.answer, quotes: filtered.quotes, shortId, commit, durationMs: result.durationMs });
+      : formatReply({
+          answer: filtered.answer, quotes: filtered.quotes, shortId, commit, durationMs: result.durationMs, runner: result.runner,
+          // Test output is evidence, but it came from a sandbox: only include it if it passes the same secret scan.
+          testOutput: result.testOutput && !scanText(result.testOutput, secretValues(config)) ? result.testOutput : undefined,
+        });
 
     record = await patchQuestion(record, {
       status: filtered.blocked ? "blocked" : "answered",
