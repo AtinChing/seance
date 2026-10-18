@@ -32,6 +32,7 @@ export interface GhostResult {
   runner: "local" | "blaxel";
   durationMs: number;
   costUsd?: number;
+  testOutput?: string;                     // blaxel mode: tail of the ghost's `npm test` re-run, shown as evidence
 }
 
 export interface QuestionRecord {
