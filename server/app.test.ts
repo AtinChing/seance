@@ -409,8 +409,17 @@ describe("/events and /healthz", () => {
     for (const s of [SEANCE_SECRET, WEBHOOK_SECRET, API_KEY]) expect(text).not.toContain(s);
   });
 
-  it("/tower is a 501 placeholder", async () => {
-    expect((await build().app.request("/tower")).status).toBe(501);
+  it("/events masks sender addresses (it is public through the tunnel)", async () => {
+    const t = build();
+    await postSigned(t.app, makeEvent());
+    await t.app.drain();
+    const res = await t.app.request("/events");
+    const reader = res.body!.getReader();
+    const { value } = await reader.read();
+    await reader.cancel();
+    const text = new TextDecoder().decode(value);
+    expect(text).toContain(t.registry.only().id);
+    expect(text).not.toContain(ALLOWED);
   });
 });
 

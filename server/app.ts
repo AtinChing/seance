@@ -8,6 +8,7 @@ import { lastCommitForSession, whoisLine, type WhoisResult } from "../shared/git
 import type { GhostRunner, Registry } from "../shared/interfaces.ts";
 import type { GhostResult, InboundEmail, QuestionRecord, SeanceEvent } from "../shared/types.ts";
 import { EventBus } from "./events.ts";
+import { maskSender } from "./tower.ts";
 import { BLOCKED_NOTICE, filterReply } from "./filter.ts";
 import { formatReply, NOTICES, replySubject } from "./format.ts";
 import { normalizeInbound, parseAbout, safeEqual, verifyPrimitiveSignature, type InboundMessage, type PrimitiveEvent } from "./inbound.ts";
@@ -324,7 +325,6 @@ export function createApp(deps: AppDeps): SeanceApp {
 
   app.get("/healthz", (c) => c.json({ ok: true, config: describeConfig(config) }));
 
-  app.get("/tower", (c) => c.text("The tower page arrives in M8.", 501));
 
   app.post("/inbound", async (c) => {
     const raw = await c.req.text();
@@ -462,12 +462,14 @@ export function createApp(deps: AppDeps): SeanceApp {
   app.get("/events", (c) =>
     streamSSE(c, async (stream) => {
       let alive = true;
+      // /events is reachable through the public tunnel, so sender addresses are masked here.
       const unsubscribe = bus.on((e) => {
-        if (alive) stream.writeSSE({ data: JSON.stringify(e) }).catch(() => { alive = false; });
+        const pub = e.type === "email_in" ? { ...e, from: maskSender(e.from).label } : e;
+        if (alive) stream.writeSSE({ data: JSON.stringify(pub) }).catch(() => { alive = false; });
       });
       stream.onAbort(() => { alive = false; unsubscribe(); });
       try {
-        await stream.writeSSE({ event: "snapshot", data: JSON.stringify({ questions: recentQuestions() }) });
+        await stream.writeSSE({ event: "snapshot", data: JSON.stringify({ questions: recentQuestions().map((q) => ({ ...q, from: maskSender(q.from).label })) }) });
         while (alive && !stream.aborted && !stream.closed) {
           await stream.sleep(heartbeatMs);
           if (!alive || stream.aborted) break;
