@@ -1,0 +1,109 @@
+{
+ "note": "Real Primitive email.received delivery captured in M0. raw data stripped, so the signature no longer matches the body.",
+ "headers": {
+  "content-type": "application/json",
+  "primitive-signature": "t=1792310947,v1=96b4f78f17c62b373db847f766fc4e3a0f1250ff0e69ddf7c622b4320983cb5c",
+  "x-webhook-event": "email.received",
+  "x-webhook-id": "evt_ade5fbf2ea443e03c64e456db95fdae08d523d7f71c9b2e42d4daffae568b0eb"
+ },
+ "body": {
+  "id": "evt_ade5fbf2ea443e03c64e456db95fdae08d523d7f71c9b2e42d4daffae568b0eb",
+  "event": "email.received",
+  "version": "2025-12-14",
+  "delivery": {
+   "endpoint_id": "2c198e9e-6eef-4483-ba14-8e4e633ad9cc",
+   "attempt": 1,
+   "attempted_at": "2026-10-18T08:09:07.000Z"
+  },
+  "email": {
+   "id": "0928e799-f46b-4910-9cf8-ff7549d81f0b",
+   "received_at": "2026-10-18T08:09:07.003Z",
+   "smtp": {
+    "helo": "out1.primitive.dev",
+    "mail_from": "ask-probe@safe-maple.primitive.email",
+    "rcpt_to": [
+     "test@safe-maple.primitive.email"
+    ]
+   },
+   "headers": {
+    "message_id": "<primitive-direct-ecb4f2cf-5a6c-42cf-8d03-c522a4a07c6e@safe-maple.primitive.email>",
+    "subject": "probe internal",
+    "from": "ask-probe@safe-maple.primitive.email",
+    "to": "test@safe-maple.primitive.email",
+    "date": "Sun, 18 Oct 2026 08:09:06 +0000"
+   },
+   "content": {
+    "raw": {
+     "included": false,
+     "encoding": "base64",
+     "max_inline_bytes": 262144,
+     "size_bytes": 1018,
+     "sha256": "085bd050f06fdb796b89b3f8ef97c34d1715c6f86da5c5cad351206b9394ca9a",
+     "data": ""
+    },
+    "download": {
+     "url": "https://api.primitive.dev/v1/emails/0928e799-f46b-4910-9cf8-ff7549d81f0b/raw?token=REDACTED",
+     "expires_at": "2026-10-19T08:09:07.000Z"
+    }
+   },
+   "parsed": {
+    "status": "complete",
+    "error": null,
+    "body_text": "hello from ask-probe\n",
+    "body_html": null,
+    "reply_to": null,
+    "cc": null,
+    "bcc": null,
+    "to_addresses": [
+     {
+      "address": "test@safe-maple.primitive.email",
+      "name": null
+     }
+    ],
+    "in_reply_to": null,
+    "references": null,
+    "attachments": [],
+    "attachments_download_url": null
+   },
+   "analysis": {
+    "sender": {
+     "authenticated": true,
+     "basis": "dmarc_aligned",
+     "reasons": [
+      "DKIM signature aligned with the From domain"
+     ]
+    }
+   },
+   "auth": {
+    "spf": "pass",
+    "dmarc": "pass",
+    "dmarcPolicy": "none",
+    "dmarcFromDomain": "primitive.email",
+    "dmarcSpfAligned": true,
+    "dmarcDkimAligned": true,
+    "dmarcSpfStrict": false,
+    "dmarcDkimStrict": false,
+    "dkimSignatures": [
+     {
+      "domain": "primitive.email",
+      "selector": "safe-maple.pri-dacfdba29697db82",
+      "result": "pass",
+      "aligned": true,
+      "keyBits": 2048,
+      "algo": "rsa-sha256"
+     }
+    ]
+   },
+   "thread_id": "0288a161-7111-416f-bf8e-c6317dddbe83",
+   "relay": null
+  },
+  "routing": {
+   "outcome": "defaulted",
+   "version": 2,
+   "endpoint_id": "2c198e9e-6eef-4483-ba14-8e4e633ad9cc",
+   "matched_tier": null,
+   "default_scope": "org",
+   "matched_route_id": null
+  }
+ }
+}

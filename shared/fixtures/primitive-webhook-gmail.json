@@ -1,0 +1,112 @@
+{
+ "note": "Real Primitive email.received delivery captured in M0. raw data stripped, so the signature no longer matches the body.",
+ "headers": {
+  "content-type": "application/json",
+  "primitive-signature": "t=1792311011,v1=97fc542623478bdd08486a75992f732236fffa16df69bbac5f22eee4a3ef2d26",
+  "x-webhook-event": "email.received",
+  "x-webhook-id": "evt_a95905e3d727ef0c22cb0f6571e46661b89261bb476a504fadf10531fccbd8f9"
+ },
+ "body": {
+  "id": "evt_a95905e3d727ef0c22cb0f6571e46661b89261bb476a504fadf10531fccbd8f9",
+  "event": "email.received",
+  "version": "2025-12-14",
+  "delivery": {
+   "endpoint_id": "2c198e9e-6eef-4483-ba14-8e4e633ad9cc",
+   "attempt": 1,
+   "attempted_at": "2026-10-18T08:10:11.000Z"
+  },
+  "email": {
+   "id": "6d50cabb-d261-457a-b862-db6cc3069ac5",
+   "received_at": "2026-10-18T08:10:11.237Z",
+   "smtp": {
+    "helo": "mail-oo1-f53.google.com",
+    "mail_from": "asker.example@gmail.com",
+    "rcpt_to": [
+     "test@safe-maple.primitive.email"
+    ]
+   },
+   "headers": {
+    "message_id": "<CAM1wC+ri0SXNgtb_L2b1UXjUiY6m-3d0wMV7ATXC-OYqf6p9fg@mail.gmail.com>",
+    "subject": "seance probe from gmail",
+    "from": "Test Asker <asker.example@gmail.com>",
+    "to": "test@safe-maple.primitive.email",
+    "date": "Sun, 18 Oct 2026 01:09:58 -0700"
+   },
+   "content": {
+    "raw": {
+     "included": false,
+     "encoding": "base64",
+     "max_inline_bytes": 262144,
+     "size_bytes": 4511,
+     "sha256": "8bd8100643af6cf75257b3ffc62488209201de4784584480915c97f5ad3e911d",
+     "data": ""
+    },
+    "download": {
+     "url": "https://api.primitive.dev/v1/emails/6d50cabb-d261-457a-b862-db6cc3069ac5/raw?token=REDACTED",
+     "expires_at": "2026-10-19T08:10:11.000Z"
+    }
+   },
+   "parsed": {
+    "status": "complete",
+    "error": null,
+    "body_text": "hello from gmail probe\n",
+    "body_html": "<div dir=\"ltr\">hello from gmail probe</div>\n",
+    "reply_to": null,
+    "cc": null,
+    "bcc": null,
+    "to_addresses": [
+     {
+      "address": "test@safe-maple.primitive.email",
+      "name": null
+     }
+    ],
+    "in_reply_to": null,
+    "references": null,
+    "attachments": [],
+    "attachments_download_url": null
+   },
+   "analysis": {
+    "spamassassin": {
+     "score": 0.9
+    },
+    "sender": {
+     "authenticated": true,
+     "basis": "dmarc_aligned",
+     "reasons": [
+      "DKIM signature aligned with the From domain"
+     ]
+    }
+   },
+   "auth": {
+    "spf": "pass",
+    "dmarc": "pass",
+    "dmarcPolicy": "none",
+    "dmarcFromDomain": "gmail.com",
+    "dmarcSpfAligned": true,
+    "dmarcDkimAligned": true,
+    "dmarcSpfStrict": false,
+    "dmarcDkimStrict": false,
+    "dkimSignatures": [
+     {
+      "domain": "gmail.com",
+      "selector": "20251104",
+      "result": "pass",
+      "aligned": true,
+      "keyBits": 2048,
+      "algo": "rsa-sha256"
+     }
+    ]
+   },
+   "thread_id": "0d634a30-30ea-b706-688d-729c5dd80ea0",
+   "relay": null
+  },
+  "routing": {
+   "outcome": "defaulted",
+   "version": 2,
+   "endpoint_id": "2c198e9e-6eef-4483-ba14-8e4e633ad9cc",
+   "matched_tier": null,
+   "default_scope": "org",
+   "matched_route_id": null
+  }
+ }
+}
