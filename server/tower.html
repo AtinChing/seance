@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070c">
+<title>Séance Tower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070c;
+  --bg-2: #0d0c16;
+  --card: #12111d;
+  --card-2: #181628;
+  --line: #2a2740;
+  --line-soft: #1f1d30;
+  --text: #f5f2ff;
+  --muted: #a8a2c4;
+  --faint: #6f6990;
+  --ghost: #bba6ff;
+  --ghost-2: #8f74ff;
+  --ok: #5cf0a6;
+  --ok-bg: rgba(92, 240, 166, 0.12);
+  --warn: #ffc95c;
+  --warn-bg: rgba(255, 201, 92, 0.12);
+  --stop: #ff5f7e;
+  --stop-bg: rgba(255, 95, 126, 0.12);
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 22px;
+  --gutter: clamp(16px, 3.2vw, 56px);
+  font-size: clamp(16px, 0.55vw + 11px, 24px);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(143, 116, 255, 0.20), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(92, 240, 166, 0.06), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+.wrap { max-width: 1500px; margin: 0 auto; padding: calc(var(--gutter) * 0.8) var(--gutter) 64px; }
+
+/* ---------- header ---------- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 0.55rem; font-weight: 600; letter-spacing: 0.02em; color: var(--muted); font-size: 0.95rem; }
+.brand svg { width: 1.6rem; height: 1.6rem; color: var(--ghost); filter: drop-shadow(0 0 10px rgba(187, 166, 255, 0.55)); animation: float 4s ease-in-out infinite; }
+.brand b { color: var(--text); font-weight: 700; }
+.live { display: inline-flex; align-items: center; gap: 0.5rem; font: 600 0.72rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; padding: 0.5rem 0.8rem; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--muted); }
+.live i { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--faint); }
+.live.on { color: var(--ok); border-color: rgba(92, 240, 166, 0.35); }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 0 rgba(92, 240, 166, 0.7); animation: ping 2s infinite; }
+.live.off { color: var(--warn); border-color: rgba(255, 201, 92, 0.35); }
+.live.off i { background: var(--warn); animation: blink 1s infinite; }
+
+.hero { margin: clamp(20px, 3.5vw, 56px) 0 clamp(18px, 2.4vw, 36px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 56px); align-items: end; }
+.tagline { font-family: var(--serif); font-weight: 400; font-size: clamp(2.6rem, 5.2vw, 6.2rem); line-height: 0.98; letter-spacing: -0.01em; margin: 0; }
+.tagline em { display: block; font-style: italic; color: var(--ghost); text-shadow: 0 0 40px rgba(187, 166, 255, 0.45); }
+.ask { background: linear-gradient(180deg, rgba(187,166,255,0.10), rgba(187,166,255,0.03)); border: 1px solid rgba(187, 166, 255, 0.28); border-radius: var(--radius); padding: 1.1rem 1.3rem 1.2rem; min-width: 0; }
+.ask .label { font: 600 0.72rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ghost); margin-bottom: 0.7rem; }
+.ask a.addr { display: block; font: 600 clamp(1.05rem, 1.6vw, 2.1rem)/1.25 var(--mono); color: var(--text); text-decoration: none; }
+.ask a.addr span { white-space: nowrap; }
+.ask a.addr .dom { color: var(--muted); }
+.ask a.addr + a.addr { margin-top: 0.4rem; }
+.ask a.addr:hover { color: var(--ghost); }
+.ask .hint { color: var(--muted); font-size: 0.85rem; margin-top: 0.7rem; }
+.ask .none { color: var(--faint); font-family: var(--mono); font-size: 1rem; }
+
+.stats { display: flex; gap: clamp(10px, 1.6vw, 28px); flex-wrap: wrap; margin-bottom: clamp(18px, 2.2vw, 34px); color: var(--muted); font-size: 0.9rem; }
+.stat { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 0.95rem; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--line-soft); }
+.stat b { font: 600 1.35rem/1 var(--mono); color: var(--text); }
+.stat.ok b { color: var(--ok); }
+.stat.stop b { color: var(--stop); }
+
+/* ---------- cards ---------- */
+#list { display: flex; flex-direction: column; gap: clamp(14px, 1.6vw, 26px); }
+.card { position: relative; background: linear-gradient(180deg, var(--card-2), var(--card)); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(16px, 1.8vw, 30px) clamp(16px, 2vw, 34px); overflow: hidden; }
+.card.enter { animation: enter 0.75s cubic-bezier(0.2, 0.9, 0.25, 1.15) both; }
+.card.enter::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 2px var(--ghost), 0 0 60px rgba(187, 166, 255, 0.4); animation: flash 2.6s ease-out forwards; }
+.card.waking { border-color: rgba(187, 166, 255, 0.5); box-shadow: 0 0 0 1px rgba(187, 166, 255, 0.15), 0 20px 80px -30px rgba(143, 116, 255, 0.6); }
+.card.waking::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--ghost), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: sweep 1.6s linear infinite; }
+.card.blocked { border-color: rgba(255, 95, 126, 0.45); }
+.card.old { opacity: 0.82; }
+
+.meta { display: flex; align-items: center; gap: 0.6rem 0.8rem; flex-wrap: wrap; color: var(--muted); font-size: 0.88rem; }
+.avatar { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,0.05); border: 1px solid var(--line); flex: none; }
+.avatar svg { width: 1.05rem; height: 1.05rem; color: var(--muted); }
+.who { color: var(--text); font-weight: 600; font-family: var(--mono); font-size: 0.92rem; }
+.arrow { color: var(--faint); }
+.chip { font: 500 0.8rem/1 var(--mono); padding: 0.38rem 0.6rem; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.sess { color: var(--ghost); border-color: rgba(187, 166, 255, 0.3); background: rgba(187, 166, 255, 0.07); }
+.ago { margin-left: auto; color: var(--faint); font-family: var(--mono); font-size: 0.8rem; white-space: nowrap; }
+.question { font-family: var(--serif); font-size: clamp(1.6rem, 2.4vw, 3rem); line-height: 1.12; margin: 0.7rem 0 1.1rem; overflow-wrap: anywhere; }
+.question::before { content: "“"; color: var(--ghost); margin-right: 0.04em; }
+.question::after { content: "”"; color: var(--ghost); margin-left: 0.02em; }
+
+/* timeline */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+.step { position: relative; padding: 0 0.8rem 0 0; min-width: 0; }
+.step .row { display: flex; align-items: center; }
+.dot { width: 1.7rem; height: 1.7rem; border-radius: 50%; flex: none; display: grid; place-items: center; border: 2px solid var(--line); background: var(--bg-2); color: var(--faint); transition: all 0.4s ease; z-index: 1; }
+.dot svg { width: 0.95rem; height: 0.95rem; }
+.bar { flex: 1; height: 2px; background: var(--line); margin-left: 0.6rem; border-radius: 2px; position: relative; overflow: hidden; }
+.step:last-child .bar { display: none; }
+.step .name { margin-top: 0.55rem; font-weight: 600; font-size: 0.95rem; color: var(--faint); transition: color 0.4s; }
+.step .detail { font-family: var(--mono); font-size: 0.8rem; color: var(--faint); margin-top: 0.15rem; overflow-wrap: anywhere; }
+.step.done .dot { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.step.done .bar { background: linear-gradient(90deg, var(--ok), rgba(92,240,166,0.4)); }
+.step.done .name { color: var(--text); }
+.step.done .detail { color: var(--muted); }
+.step.active .dot { border-color: var(--ghost); color: var(--ghost); background: rgba(187,166,255,0.12); }
+.step.active .name { color: var(--ghost); }
+.step.active .detail { color: var(--text); }
+.step.active .bar::after { content: ""; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--ghost), transparent); animation: slide 1.2s linear infinite; }
+.step.warn .dot { border-color: var(--warn); color: var(--warn); background: var(--warn-bg); }
+.step.warn .name { color: var(--warn); }
+.step.warn .detail { color: var(--muted); }
+.step.stop .dot { border-color: var(--stop); color: var(--stop); background: var(--stop-bg); box-shadow: 0 0 24px rgba(255, 95, 126, 0.5); }
+.step.stop .name { color: var(--stop); }
+.step.stop .detail { color: var(--muted); }
+.step.fail .dot { border-color: var(--stop); color: var(--stop); background: var(--stop-bg); }
+.step.fail .name { color: var(--stop); }
+.step.just .dot { animation: pop 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+.spin { width: 0.95rem; height: 0.95rem; border-radius: 50%; border: 2px solid rgba(187,166,255,0.25); border-top-color: var(--ghost); animation: rot 0.8s linear infinite; }
+.tick { font-variant-numeric: tabular-nums; }
+
+/* answer */
+.answer { margin-top: 1.3rem; padding-top: 1.2rem; border-top: 1px dashed var(--line); }
+.answer.reveal { animation: reveal 0.8s ease both; }
+.answer .label, .evidence .label { font: 600 0.7rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ghost); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+.answer .label svg { width: 1rem; height: 1rem; }
+.answer p { margin: 0; font-size: clamp(1.1rem, 1.35vw, 1.6rem); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.evidence { margin-top: 1rem; }
+.quotes { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+.quote { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.7rem 0.9rem; border-radius: 12px; background: rgba(255,255,255,0.025); border: 1px solid var(--line-soft); }
+.quote .badge { flex: none; display: inline-flex; align-items: center; gap: 0.35rem; font: 600 0.75rem/1 var(--mono); padding: 0.35rem 0.55rem; border-radius: 999px; white-space: nowrap; margin-top: 0.1rem; }
+.quote.v .badge { color: var(--ok); background: var(--ok-bg); border: 1px solid rgba(92,240,166,0.35); }
+.quote.u .badge { color: var(--warn); background: var(--warn-bg); border: 1px solid rgba(255,201,92,0.35); }
+.quote q { font-family: var(--mono); font-size: 0.92rem; color: var(--text); overflow-wrap: anywhere; quotes: "“" "”"; }
+.quote.u q { color: var(--muted); }
+.reveal .quote { animation: reveal 0.6s ease both; }
+.reveal .quote:nth-child(2) { animation-delay: 0.12s; }
+.reveal .quote:nth-child(3) { animation-delay: 0.24s; }
+.facts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.facts .chip b { color: var(--text); font-weight: 600; }
+details.tests { margin-top: 0.9rem; }
+details.tests summary { cursor: pointer; color: var(--muted); font: 500 0.8rem var(--mono); }
+details.tests pre { margin: 0.6rem 0 0; padding: 0.8rem; border-radius: 10px; background: #05050a; border: 1px solid var(--line-soft); font: 0.75rem/1.4 var(--mono); color: var(--muted); max-height: 16rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* banners */
+.banner { margin-top: 1.3rem; display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border-radius: 16px; }
+.banner svg { width: 2.4rem; height: 2.4rem; flex: none; }
+.banner .t { font-weight: 700; font-size: clamp(1.15rem, 1.6vw, 1.9rem); line-height: 1.15; }
+.banner .s { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+.banner code { font-family: var(--mono); color: var(--text); background: rgba(255,255,255,0.06); padding: 0.1rem 0.4rem; border-radius: 6px; }
+.banner.stop { background: linear-gradient(90deg, rgba(255,95,126,0.18), rgba(255,95,126,0.05)); border: 1px solid rgba(255,95,126,0.5); color: var(--stop); }
+.banner.stop .t { color: #ffd6de; }
+.banner.stop.stamp { animation: stamp 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.banner.stop.stamp svg { animation: shield 1.2s ease 0.3s both; }
+.banner.warn { background: var(--warn-bg); border: 1px solid rgba(255,201,92,0.4); color: var(--warn); }
+.banner.warn .t { font-size: clamp(1rem, 1.25vw, 1.4rem); color: #ffe7b3; }
+.banner.fail { background: var(--stop-bg); border: 1px solid rgba(255,95,126,0.35); color: var(--stop); }
+.banner.fail .t { font-size: clamp(1rem, 1.25vw, 1.4rem); }
+
+/* empty */
+.empty { text-align: center; padding: clamp(40px, 7vw, 110px) 16px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); }
+.empty svg { width: clamp(64px, 7vw, 120px); height: auto; color: var(--ghost); opacity: 0.9; filter: drop-shadow(0 0 30px rgba(187,166,255,0.5)); animation: float 4s ease-in-out infinite; }
+.empty h2 { font: 400 clamp(1.8rem, 3vw, 3.4rem)/1.1 var(--serif); color: var(--text); margin: 1rem 0 0.5rem; }
+.empty p { margin: 0; font-size: 1rem; }
+
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(150%); background: var(--card-2); border: 1px solid rgba(255,95,126,0.5); color: var(--text); padding: 0.75rem 1.1rem; border-radius: 12px; font-size: 0.9rem; transition: transform 0.4s ease; max-width: calc(100vw - 32px); z-index: 10; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@keyframes enter { from { opacity: 0; transform: translateY(-28px) scale(0.97); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes sweep { from { background-position: -50% 0; } to { background-position: 150% 0; } }
+@keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@keyframes rot { to { transform: rotate(360deg); } }
+@keyframes pop { 0% { transform: scale(0.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.35) rotate(-2.5deg); } 60% { opacity: 1; transform: scale(0.98) rotate(0.4deg); } 100% { transform: none; } }
+@keyframes shield { 0% { transform: scale(1); } 30% { transform: scale(1.25); filter: drop-shadow(0 0 18px rgba(255,95,126,0.9)); } 100% { transform: scale(1); } }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(92,240,166,0.6); } 80%, 100% { box-shadow: 0 0 0 10px rgba(92,240,166,0); } }
+@keyframes blink { 50% { opacity: 0.3; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; align-items: start; }
+}
+@media (max-width: 640px) {
+  :root { --radius: 16px; }
+  .steps { grid-template-columns: 1fr; gap: 0.2rem; }
+  .step { display: grid; grid-template-columns: 1.7rem 1fr; column-gap: 0.75rem; padding: 0; }
+  .step .row { grid-row: span 2; flex-direction: column; align-items: center; height: 100%; }
+  .bar { width: 2px; height: auto; min-height: 0.9rem; flex: 1; margin: 0.2rem 0; }
+  .step:last-child .bar { display: none; }
+  .step .name { margin-top: 0.15rem; }
+  .step .detail { margin-bottom: 0.55rem; }
+  .step.active .bar::after { display: none; }
+  .ago { margin-left: 0; width: 100%; }
+  .banner { align-items: flex-start; }
+  .banner svg { width: 1.8rem; height: 1.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8v11.2c0 .7.8 1 1.3.6l1.7-1.4 1.9 1.6c.4.3.9.3 1.3 0L12 20.4l1.8 1.6c.4.3.9.3 1.3 0l1.9-1.6 1.7 1.4c.5.4 1.3.1 1.3-.6V10a8 8 0 0 0-8-8Zm-3 10.2a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Zm6 0a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Z"/></svg>
+      <span><b>Séance</b> · tower</span>
+    </div>
+    <div id="live" class="live off" role="status" aria-live="polite"><i></i><span>connecting</span></div>
+  </div>
+
+  <section class="hero">
+    <h1 class="tagline">Email a dead agent. <em>It answers.</em></h1>
+    <div class="ask" id="ask">
+      <div class="label">Ask a ghost · email</div>
+      <div id="addrs"><span class="none">waiting for a session…</span></div>
+      <div class="hint">Your question shows up here within seconds. The reply comes back in your thread.</div>
+    </div>
+  </section>
+
+  <div class="stats" id="stats" aria-live="polite"></div>
+  <main id="list" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" role="alert"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const list = $("#list");
+  const MAX_CARDS = 30;
+
+  // ---- tiny DOM helper: never uses innerHTML for data ----
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const k of kids.flat()) if (k != null && k !== false) el.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return el;
+  }
+  const NS = "http://www.w3.org/2000/svg";
+  const ICONS = {
+    check: '<path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+    mail: '<path d="M4 6h16v12H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+    ghost: '<path fill="currentColor" d="M12 2a8 8 0 0 0-8 8v11.2c0 .7.8 1 1.3.6l1.7-1.4 1.9 1.6c.4.3.9.3 1.3 0L12 20.4l1.8 1.6c.4.3.9.3 1.3 0l1.9-1.6 1.7 1.4c.5.4 1.3.1 1.3-.6V10a8 8 0 0 0-8-8Zm-3 10.2a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Zm6 0a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Z"/>',
+    quote: '<path fill="currentColor" d="M7 7h4v4c0 3-1.5 5-4.5 6l-.7-1.3C7.6 15 8.4 13.8 8.5 12H7zm7 0h4v4c0 3-1.5 5-4.5 6l-.7-1.3c1.8-.7 2.6-1.9 2.7-3.7H14z"/>',
+    shield: '<path d="M12 2.5l8 3v6.2c0 4.8-3.3 8.6-8 9.8-4.7-1.2-8-5-8-9.8V5.5z" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 9l7 7M15.5 9l-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+    x: '<path d="M7 7l10 10M17 7L7 17" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
+    warn: '<path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+    send: '<path d="M4 12l16-8-6 16-2.5-6.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+    person: '<circle cx="12" cy="8.5" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+    bot: '<rect x="4.5" y="8" width="15" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4.5V8M9 13h.01M15 13h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+    dots: '<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>',
+  };
+  function icon(name) {
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.setAttribute("aria-hidden", "true");
+    s.innerHTML = ICONS[name]; // static markup, never data
+    return s;
+  }
+
+  // ---- clock (server-relative, so a projector laptop with a skewed clock still ticks right) ----
+  let skew = 0;
+  const nowMs = () => Date.now() + skew;
+  const secs = (ms) => {
+    const s = Math.max(0, ms / 1000);
+    return s < 10 ? s.toFixed(1) + "s" : Math.round(s) + "s";
+  };
+  const clock = (iso) => {
+    const d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  };
+  const ago = (iso) => {
+    const s = Math.max(0, Math.round((nowMs() - Date.parse(iso)) / 1000));
+    if (s < 5) return "just now";
+    if (s < 60) return s + "s ago";
+    if (s < 3600) return Math.floor(s / 60) + "m ago";
+    return Math.floor(s / 3600) + "h ago";
+  };
+
+  // ---- the header address ----
+  const params = new URLSearchParams(location.search);
+  const ADDR_RE = /^[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+  const SID_RE = /^s-[0-9a-f]{8}$/i;
+  const fixedAddrs = (params.get("address") || "").split(",").map((s) => s.trim()).filter((s) => ADDR_RE.test(s) || SID_RE.test(s));
+  let lastAddrKey = "";
+  function renderAddresses(serverAddrs) {
+    let addrs = fixedAddrs.slice();
+    if (addrs.length) {
+      // ?address=s-xxxxxxxx borrows the domain from the server's address, if it knows one.
+      const domain = (serverAddrs[0] || "").split("@")[1];
+      addrs = addrs.map((a) => (SID_RE.test(a) && domain ? a + "@" + domain : a));
+    } else addrs = serverAddrs.slice(0, 3);
+    const key = addrs.join(",");
+    if (key === lastAddrKey) return;
+    lastAddrKey = key;
+    const box = $("#addrs");
+    box.replaceChildren();
+    if (!addrs.length) { box.append(h("span", { class: "none", text: "waiting for a session…" })); return; }
+    for (const a of addrs.map((x) => x.toLowerCase())) {
+      const at = a.indexOf("@");
+      // Break only before the @, never inside "s-xxxxxxxx".
+      const kids = at > 0 ? [h("span", { text: a.slice(0, at) }), document.createElement("wbr"), h("span", { class: "dom", text: a.slice(at) })] : [h("span", { text: a })];
+      box.append(h("a", { class: "addr", href: at > 0 ? "mailto:" + a : null }, kids));
+    }
+  }
+
+  // ---- stats ----
+  function renderStats(qs) {
+    const answered = qs.filter((q) => q.status === "answered").length;
+    const verified = qs.reduce((n, q) => n + (q.status === "answered" ? (q.verified || 0) : 0), 0);
+    const stopped = qs.filter((q) => q.status === "blocked").length;
+    const box = $("#stats");
+    box.replaceChildren(
+      h("div", { class: "stat" }, h("b", { text: String(qs.length) }), qs.length === 1 ? "question" : "questions"),
+      h("div", { class: "stat" }, h("b", { text: String(answered) }), "answered"),
+      h("div", { class: "stat ok" }, h("b", { text: String(verified) }), "quotes verified"),
+      h("div", { class: "stat stop" }, h("b", { text: String(stopped) }), stopped === 1 ? "reply stopped" : "replies stopped"),
+    );
+  }
+
+  // ---- one card ----
+  function stepsFor(q) {
+    const s = q.status;
+    const pending = s === "received" || s === "waking";
+    const steps = [];
+    steps.push({ key: "in", state: "done", icon: "mail", name: "Email received", detail: clock(q.createdAt) });
+
+    if (pending) steps.push({ key: "wake", state: "active", spin: true, name: "Ghost waking", tickFrom: q.createdAt });
+    else if (s === "error" && q.durationMs == null) steps.push({ key: "wake", state: "fail", icon: "x", name: "Ghost failed", detail: "couldn't answer" });
+    else steps.push({ key: "wake", state: "done", icon: "ghost", name: "Ghost answered", detail: q.durationMs != null ? "in " + secs(q.durationMs) + (q.runner ? " · " + q.runner : "") : "" });
+
+    if (pending) steps.push({ key: "quotes", state: "pending", icon: "quote", name: "Quotes verified", detail: "…" });
+    else if (q.total == null) steps.push({ key: "quotes", state: s === "error" ? "pending" : "done", icon: "quote", name: "Quotes verified", detail: s === "error" ? "—" : "no quotes" });
+    else if (q.total === 0) steps.push({ key: "quotes", state: "done", icon: "quote", name: "Quotes verified", detail: "no quotes" });
+    else steps.push({ key: "quotes", state: q.verified > 0 ? "done" : "warn", icon: q.verified > 0 ? "check" : "warn", name: "Quotes verified", detail: q.verified + "/" + q.total + " verified" });
+
+    if (pending) steps.push({ key: "out", state: "pending", icon: "send", name: "Reply", detail: "" });
+    else if (s === "blocked") steps.push({ key: "out", state: "stop", icon: "shield", name: "Reply stopped", detail: "blocked: " + (q.blockedRule || "secret") });
+    else if (s === "error") steps.push({ key: "out", state: "fail", icon: "x", name: "Error", detail: "apology sent" });
+    else if (q.delivery === "sent") steps.push({ key: "out", state: "done", icon: "send", name: "Reply sent", detail: q.answeredAt ? clock(q.answeredAt) : "" });
+    else if (q.delivery === "refused") steps.push({ key: "out", state: "warn", icon: "warn", name: "Delivery refused", detail: "recipient gate" });
+    else if (q.delivery === "failed") steps.push({ key: "out", state: "warn", icon: "warn", name: "Send failed", detail: "answer shown here" });
+    else if (q.delivery === "pending") steps.push({ key: "out", state: "active", spin: true, name: "Sending reply", detail: "" });
+    else steps.push({ key: "out", state: "done", icon: "check", name: "Answered", detail: q.answeredAt ? clock(q.answeredAt) : "" });
+    return steps;
+  }
+
+  const cards = new Map(); // id -> { el, sig, stepStates, hadAnswer, wasBlocked }
+
+  function buildCard(q, prev) {
+    const steps = stepsFor(q);
+    const el = h("article", { class: "card " + q.status, "data-id": q.id });
+
+    el.append(h("div", { class: "meta" },
+      h("span", { class: "avatar", title: q.fromKind === "agent" ? "an agent asked" : "a person asked" }, icon(q.fromKind === "agent" ? "bot" : "person")),
+      h("span", { class: "who", text: q.from }),
+      h("span", { class: "arrow", text: "→" }),
+      h("span", { class: "chip sess", text: q.session }),
+      q.file ? h("span", { class: "chip", text: q.file + (q.line != null ? ":" + q.line : "") }) : null,
+      h("span", { class: "ago", "data-ago": q.createdAt, text: ago(q.createdAt) }),
+    ));
+    el.append(h("p", { class: "question", text: q.question }));
+
+    const ol = h("ol", { class: "steps" });
+    const states = {};
+    for (const st of steps) {
+      states[st.key] = st.state + ":" + st.name;
+      const changed = prev && prev.stepStates[st.key] !== states[st.key] && st.state !== "pending";
+      const dot = h("span", { class: "dot" }, st.spin ? h("span", { class: "spin" }) : st.state === "pending" ? icon(st.icon || "dots") : icon(st.icon || "check"));
+      const detail = st.tickFrom
+        ? h("div", { class: "detail" }, h("span", { class: "tick", "data-tick": st.tickFrom, text: secs(nowMs() - Date.parse(st.tickFrom)) }), " elapsed")
+        : h("div", { class: "detail", text: st.detail || " " });
+      ol.append(h("li", { class: "step " + st.state + (changed ? " just" : "") }, h("div", { class: "row" }, dot, h("span", { class: "bar" })), h("div", { class: "name", text: st.name }), detail));
+    }
+    el.append(ol);
+
+    const hasAnswer = q.answer != null && q.status !== "blocked";
+    if (hasAnswer) {
+      const ans = h("section", { class: "answer" + (prev && !prev.hadAnswer ? " reveal" : "") },
+        h("div", { class: "label" }, icon("ghost"), "The ghost says"),
+        h("p", { text: q.answer }),
+      );
+      if (q.quotes && q.quotes.length) {
+        ans.append(h("div", { class: "evidence" },
+          h("div", { class: "label", text: "Evidence from " + q.session + "'s own history" }),
+          h("ul", { class: "quotes" }, q.quotes.map((x) => h("li", { class: "quote " + (x.verified ? "v" : "u") },
+            h("span", { class: "badge" }, x.verified ? "✓ verified" : "? unverified"),
+            h("q", { text: x.text }),
+          ))),
+        ));
+      }
+      const facts = h("div", { class: "facts" });
+      if (q.durationMs != null) facts.append(h("span", { class: "chip" }, "answered in ", h("b", { text: secs(q.durationMs) })));
+      if (q.runner) facts.append(h("span", { class: "chip" }, "runner ", h("b", { text: q.runner === "blaxel" ? "blaxel sandbox" : "local fork" })));
+      if (q.confidence) facts.append(h("span", { class: "chip" }, "confidence ", h("b", { text: q.confidence })));
+      facts.append(h("span", { class: "chip", text: "original session not modified" }));
+      ans.append(facts);
+      if (q.testOutput) ans.append(h("details", { class: "tests" }, h("summary", { text: "ghost re-ran the tests in its sandbox" }), h("pre", { text: q.testOutput })));
+      el.append(ans);
+    }
+
+    if (q.status === "blocked") {
+      el.append(h("div", { class: "banner stop" + (prev && !prev.wasBlocked ? " stamp" : "") }, icon("shield"),
+        h("div", {},
+          h("div", { class: "t", text: "Séance stopped this reply before it went out." }),
+          h("div", { class: "s" }, "It looked like it contained a secret (rule ", h("code", { text: q.blockedRule || "secret" }), "). The ghost's text never left the server."),
+        )));
+    } else if (q.status === "answered" && q.delivery === "refused") {
+      el.append(h("div", { class: "banner warn" }, icon("warn"),
+        h("div", {},
+          h("div", { class: "t", text: "Answered, but email delivery was refused." }),
+          h("div", { class: "s", text: "Primitive's recipient gate didn't allow a reply to this address, so the answer is shown here instead." }),
+        )));
+    } else if (q.status === "answered" && q.delivery === "failed") {
+      el.append(h("div", { class: "banner warn" }, icon("warn"),
+        h("div", {}, h("div", { class: "t", text: "Answered, but the reply email failed to send." }), h("div", { class: "s", text: "The answer is shown here instead." }))));
+    } else if (q.status === "error") {
+      el.append(h("div", { class: "banner fail" }, icon("x"),
+        h("div", {}, h("div", { class: "t", text: "The ghost couldn't answer this one." }), h("div", { class: "s", text: "The sender got an apology instead." }))));
+    }
+
+    return { el, states, hasAnswer };
+  }
+
+  function upsertCard(q, isInitial) {
+    const sig = JSON.stringify(q);
+    const prev = cards.get(q.id);
+    if (prev && prev.sig === sig) return prev.el;
+    const built = buildCard(q, prev);
+    let el = built.el;
+    if (!prev) { if (!isInitial) el.classList.add("enter"); }
+    else {
+      // Update in place so a running entry animation isn't cut short.
+      el = prev.el;
+      el.className = built.el.className + (el.classList.contains("enter") ? " enter" : "");
+      el.replaceChildren(...built.el.childNodes);
+    }
+    cards.set(q.id, { el, sig, stepStates: built.states, hadAnswer: built.hasAnswer, wasBlocked: q.status === "blocked" });
+    return el;
+  }
+
+  let firstRender = true;
+  function render(data) {
+    if (typeof data.serverNow === "number") skew = data.serverNow - Date.now();
+    renderAddresses(Array.isArray(data.addresses) ? data.addresses : []);
+    const qs = (Array.isArray(data.questions) ? data.questions : [])
+      .slice()
+      .sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0));
+    renderStats(qs);
+    const shown = qs.slice(0, MAX_CARDS);
+
+    if (!shown.length) {
+      cards.clear();
+      list.replaceChildren(h("div", { class: "empty" }, icon("ghost"),
+        h("h2", { text: "Waiting for the first email…" }),
+        h("p", { text: "Send a question to the address above. It will appear here the moment it lands." })));
+      firstRender = false;
+      return;
+    }
+    const empty = list.querySelector(".empty");
+    if (empty) empty.remove();
+
+    const keep = new Set(shown.map((q) => q.id));
+    for (const [id, c] of cards) if (!keep.has(id)) { c.el.remove(); cards.delete(id); }
+
+    const els = shown.map((q) => upsertCard(q, firstRender));
+    // Place each card in order without moving ones that are already in place (moving restarts animations).
+    let anchor = null;
+    for (const el of els) {
+      const want = anchor ? anchor.nextElementSibling : list.firstElementChild;
+      if (want !== el) {
+        if (anchor) anchor.after(el); else list.prepend(el);
+      }
+      anchor = el;
+    }
+    els.forEach((el, i) => el.classList.toggle("old", i >= 3 && !el.classList.contains("waking")));
+    firstRender = false;
+  }
+
+  // ---- data ----
+  const base = location.pathname.replace(/\/tower\/?$/, "/"); // works behind a path prefix too
+  let inflight = false, again = false, timer = null;
+  async function refresh() {
+    if (inflight) { again = true; return; }
+    inflight = true;
+    try {
+      const res = await fetch(base + "tower/questions.json", { cache: "no-store" });
+      if (res.ok) render(await res.json());
+    } catch (_) { /* next event or poll retries */ }
+    finally {
+      inflight = false;
+      if (again) { again = false; refresh(); }
+    }
+  }
+  function soon(ms) { clearTimeout(timer); timer = setTimeout(refresh, ms); }
+
+  // ---- live stream ----
+  const live = $("#live");
+  function setLive(on, label) { live.className = "live " + (on ? "on" : "off"); live.lastElementChild.textContent = label; }
+  let es = null, retry = 1000, retryTimer = null;
+  const eventsUrl = base + "events";
+  function connect() {
+    clearTimeout(retryTimer);
+    if (es) es.close();
+    setLive(false, retry > 1000 ? "reconnecting" : "connecting");
+    es = new EventSource(eventsUrl);
+    es.onopen = () => { retry = 1000; setLive(true, "live"); soon(0); };
+    es.addEventListener("snapshot", () => soon(0));
+    es.onmessage = (m) => {
+      let e = null;
+      try { e = JSON.parse(m.data); } catch (_) { return; }
+      if (e && e.type === "error" && !e.questionId) toast("Séance: " + (e.message || "something went wrong"));
+      soon(e && e.type === "email_in" ? 0 : 120);
+    };
+    es.onerror = () => {
+      setLive(false, "reconnecting");
+      // The browser retries on its own while CONNECTING; if it gave up, retry with backoff.
+      if (es.readyState === EventSource.CLOSED) {
+        retryTimer = setTimeout(connect, retry);
+        retry = Math.min(retry * 2, 15000);
+      }
+    };
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 5000);
+  }
+
+  // ---- ticking ----
+  setInterval(() => {
+    const n = nowMs();
+    for (const el of document.querySelectorAll("[data-tick]")) el.textContent = secs(n - Date.parse(el.getAttribute("data-tick")));
+  }, 100);
+  setInterval(() => {
+    for (const el of document.querySelectorAll("[data-ago]")) el.textContent = ago(el.getAttribute("data-ago"));
+  }, 1000);
+  // Belt and braces: poll slowly, faster when the stream is down.
+  setInterval(() => { if (!es || es.readyState !== EventSource.OPEN) refresh(); }, 5000);
+  setInterval(refresh, 30000);
+
+  refresh();
+  connect();
+})();
+</script>
+</body>
+</html>
