@@ -34,6 +34,7 @@ Usage:
   seance ask <s-xxxxxxxx@domain> "<q>"     ask a session by address
   seance ls                                list recorded sessions
   seance snapshot <shortId>                freeze a session's transcript now (if SessionEnd did not fire)
+  seance migrate                           copy the JSON registry into InsForge (safe to re-run)
   seance hook <session-start|session-end|pre-edit|prepare-commit-msg>   internal hook entry points
 
 Séance lives in ${SEANCE_ROOT}`;
@@ -181,6 +182,10 @@ export async function runCli(argv: string[], ctx: CliContext = {}): Promise<numb
         const config = ctx.config ?? getConfig();
         const registry = await (ctx.getRegistry ?? defaultRegistry)(config);
         return await snapshotCommand(args, registry, io, (ctx.now ?? (() => new Date()))());
+      }
+      case "migrate": {
+        const { migrateCommand } = await import("./migrate.ts");
+        return await migrateCommand(args, { config: ctx.config ?? getConfig(), io });
       }
       default:
         io.err(`seance: unknown command "${cmd}"\n\n${USAGE}`);
