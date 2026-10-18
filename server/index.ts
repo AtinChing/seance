@@ -6,6 +6,7 @@ import { createApp } from "./app.ts";
 import { describeEvent, EventBus } from "./events.ts";
 import { PrimitiveMailer, type ServerMailer } from "./mailer.ts";
 import { registerTowerRoutes } from "./tower.ts";
+import { registerMcpSupportRoutes } from "./mcp-support.ts";
 
 const config = getConfig();
 requireConfig(config, "primitiveDomain");
@@ -25,6 +26,7 @@ bus.on((e) => console.log(`[event] ${describeEvent(e)}`));
 
 const app = createApp({ config, registry, runner, mailer, bus });
 registerTowerRoutes(app, { recentQuestions: () => app.recentQuestions(), bus, config, registry });
+registerMcpSupportRoutes(app, { config, registry });
 
 const askMode = config.raw.SEANCE_ASK_MODE === "in-process" || !config.primitiveApiKey || !config.publicUrl ? "in-process" : "email";
 
