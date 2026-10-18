@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
+    "@blaxel/core": "^0.3.30",
     "@hono/node-server": "^2.1.5",
+    "@insforge/sdk": "^1.5.2",
     "@primitivedotdev/sdk": "^2.4.0",
     "dotenv": "^18.0.8",
     "hono": "^4.13.13",
