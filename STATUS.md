@@ -1,6 +1,6 @@
 # Séance: status
 
-_Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Only open item: one question typed into Cursor's chat (M7)._
+_Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Nothing in the spec is left open._
 
 **Tagline:** Email a dead agent. It answers.
 
@@ -15,7 +15,7 @@ _Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Only
 | M4 | Hook self-onboarding | ✅ **passes live**, headless and **in a real interactive session**: agent asks the ghost (no approval prompt), reproduces 0.25 → 2 charges, declines and offers options; hook blocks direct edits; normal edits untouched |
 | M5 | Blaxel runner + gateway | ✅ **passes live**: Gmail → Blaxel sandbox ghost → reply in 30 s, 3/3 ✓, $0.10; key never in the sandbox; leak smoke refused. **`GHOST_RUNNER=blaxel` is now on** |
 | M6 | InsForge registry | ✅ **passes live**: `REGISTRY=insforge` is now on; Gmail question answered 4/4 ✓; the dashboard shows `sessions` (5), `questions` (11) and the `transcripts` bucket (5 snapshots) |
-| M7 | MCP server | ✅ **deployed** at `https://wild-wave-4jlxe.run.mcp-use.com/mcp` (bearer token required); real Claude Code used all 3 tools against it; the **Cursor IDE connected and listed the tools** (added to `~/.cursor/mcp.json`). Left: type one question into Cursor's chat |
+| M7 | MCP server | ✅ **deployed** at `https://wild-wave-4jlxe.run.mcp-use.com/mcp` (bearer token required); tested from **both clients**: Claude Code (all 3 tools) and **Cursor** (agent chat on Grok 4.7: found `s-055fcb2d`, asked it, "Leave it at 0.37. Dropping it to 0.25 double-charges", 3/3 ✓) |
 | M8 | Polish | ✅ `/tower` live page, Sarah opener + fake chat, leak test passes |
 
 Tests: `npx vitest run` → 297 pass (1 live InsForge test skipped by default). `npx tsc --noEmit` is clean. Everything is pushed to `AtinChing/seance` (public) in small commits; every push was scanned for `.env` secret values and personal data.
@@ -74,7 +74,6 @@ Backup if email misbehaves: `seance ask src/retry.ts:1 "why 0.37?"` (inside the 
 |---|---|---|
 | **Ask Primitive for `send_to_known_addresses`** | Without it, replies to judges' own addresses are refused | Ask the Primitive team (sponsor) at the hackathon |
 | **Redeploy the MCP when the tunnel URL changes** | The deployed MCP calls `PUBLIC_URL` | After updating `PUBLIC_URL` in `.env`: `cd mcp && npm run deploy:manufact` (redeploys the linked server with the new URL) |
-| Ask one question in Cursor | Cursor is connected but no tool call has been made from it yet | Already in `~/.cursor/mcp.json` (backup: `~/.cursor/mcp.json.bak-before-seance`). In Cursor's agent chat: "Use the seance tools: who wrote line 1 of src/retry.ts in payments-repo, and can it be lowered to 0.25?" The `cursor-agent` CLI needs `cursor-agent login` first, and it ignored the config's `headers` (401) |
 | Restart tunnel + server | Background processes from the build session may not survive | "Start everything" above |
 
 ---
@@ -103,7 +102,7 @@ Backup if email misbehaves: `seance ask src/retry.ts:1 "why 0.37?"` (inside the 
 - **Deployed** to Manufact as `seance` (`https://wild-wave-4jlxe.run.mcp-use.com/mcp`). Requests without the bearer token (in `mcp/.env.local`, gitignored) get 401.
 - **Live check:** a headless Claude Code session with only that URL (`--mcp-config … --strict-mcp-config`) ran `list_sessions` (5 sessions), `whois_line src/retry.ts:1` (→ `s-055fcb2d`, commit 28f1f645) and `ask_session` → "don't lower it… charged twice", both quotes ✓, 19 s.
 - The deploy script's temp env file now lives in `mcp/` as `.env.deploy.*`: mcp-use requires a relative path, and its uploader skips `.env*` files.
-- Not tested: Cursor.
+- **Cursor:** added to `~/.cursor/mcp.json` (backup `~/.cursor/mcp.json.bak-before-seance`). The IDE connected with the bearer token and its agent (model Grok 4.7) answered "who wrote src/retry.ts:1 and can it be 0.25?" with `whois_line` + `ask_session`: 0.25 double-charges, 3/3 ✓. Note: the separate `cursor-agent` CLI ignored the config's `headers` (401) and isn't logged in; the IDE is what matters.
 
 ### M8: polish
 - `/tower` (`server/tower.ts` + `tower.html`): a live big-screen page. It masks senders (`a***@gmail.com`), shows a live status timeline, ✓/? quotes, a red "stopped" banner for blocked replies, and an amber "delivery refused" state. Watched live during the M6 test. It polls every 3 s as a backup, because quick tunnels delay SSE.
