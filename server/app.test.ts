@@ -415,9 +415,15 @@ describe("/events and /healthz", () => {
     await t.app.drain();
     const res = await t.app.request("/events");
     const reader = res.body!.getReader();
-    const { value } = await reader.read();
+    const decoder = new TextDecoder();
+    let text = "";
+    // Under load the snapshot can arrive split across chunks; read until it is complete.
+    for (let i = 0; i < 20 && !text.includes(t.registry.only().id); i++) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      text += decoder.decode(value, { stream: true });
+    }
     await reader.cancel();
-    const text = new TextDecoder().decode(value);
     expect(text).toContain(t.registry.only().id);
     expect(text).not.toContain(ALLOWED);
   });
