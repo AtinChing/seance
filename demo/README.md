@@ -45,3 +45,25 @@ change the retry delay to 0.25
 ```
 
 The hook blocks the edit, the agent runs `seance ask`, the ghost answers, the agent backs off.
+
+## Opener (optional, before step 5)
+
+"In the good old days you ran git blame, saw Sarah wrote it, and asked her." Two scripts, run from any directory. Each pauses for Enter between steps when run in a terminal (`--no-pause` to skip, `--no-open` to not open the browser).
+
+```bash
+demo/good-old-days.sh    # blame in a repo where Sarah Chen wrote line 1, then opens the chat on the Sarah DM
+demo/end-good-days.sh    # same blame in ~/seance-demo/payments-repo: Agent-Session trailer, seance whois, then the chat DM with the session
+```
+
+`good-old-days.sh` builds `~/seance-demo/good-old-days` from `demo/good-old-days/` on first run (`demo/good-old-days/make-repo.sh --force` rebuilds it). Its commits are authored by Marcus Lee and Sarah Chen, made with `CLAUDECODE` unset and hooks off, so Séance never stamps them.
+
+The chat (`demo/chat/index.html`, offline, opened in the default browser) is driven from the keyboard:
+
+| Key | Does |
+| --- | --- |
+| Space, →, Enter, PageDown | next beat (press again mid-animation to finish it) |
+| ←, PageUp | back one beat |
+| R | reset this screen |
+| F | fullscreen |
+
+Beats. Sarah DM: (1) your question types itself and sends, (2) "Sarah Chen is typing…", her answer, a 👍. Session DM: (1) the same question to "Claude session 055fcb2d", then "This session ended Oct 18. There's no one to ask.", (2) the Séance card with the session's address (click it to copy). The faint control in the bottom-left corner does the same with the mouse. To open a beat directly: `index.html#session?beat=2`.
