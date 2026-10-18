@@ -118,7 +118,7 @@ describe("createGhostRunner", () => {
     expect(createGhostRunner(cfg({ GHOST_RUNNER: "messages" }))).toBeInstanceOf(MessagesRunner);
   });
 
-  it("blaxel: not yet", () => {
-    expect(() => createGhostRunner(cfg({ GHOST_RUNNER: "blaxel" }))).toThrow("blaxel runner arrives in M5");
+  it("blaxel: needs the server's TokenStore (full coverage in blaxel.test.ts)", () => {
+    expect(() => createGhostRunner(cfg({ GHOST_RUNNER: "blaxel" }))).toThrow(/needs the server's gateway TokenStore/);
   });
 });

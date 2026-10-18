@@ -24,25 +24,70 @@ export function encodeCwd(cwd: string): string {
   } catch {
     // path does not exist (yet): encode it as given
   }
-  return real.replace(/[^a-zA-Z0-9]/g, "-");
+  return encodePath(real);
+}
+
+/** The encoding rule alone, for a path that is already canonical (e.g. a path inside a sandbox). */
+export function encodePath(p: string): string {
+  return p.replace(/[^a-zA-Z0-9]/g, "-");
 }
 
 export const ALLOWED_TOOLS = "Read,Grep,Glob";
 export const DISALLOWED_TOOLS = "Bash,Edit,MultiEdit,Write,WebFetch,WebSearch";
 
-/** The exact claude argv for a ghost run (verified in M0). */
-export function ghostArgs(prompt: string, sessionId: string, model: string): string[] {
+/** The exact claude argv for a ghost run (verified in M0). Other runners pass their own tool lists. */
+export function ghostArgs(
+  prompt: string,
+  sessionId: string,
+  model: string,
+  tools: { allowed?: string; disallowed?: string } = {},
+): string[] {
   return [
     "-p", prompt,
     "--resume", sessionId,
     "--fork-session",
     "--setting-sources", "user",
     "--model", model,
-    "--allowedTools", ALLOWED_TOOLS,
-    "--disallowedTools", DISALLOWED_TOOLS,
+    "--allowedTools", tools.allowed ?? ALLOWED_TOOLS,
+    "--disallowedTools", tools.disallowed ?? DISALLOWED_TOOLS,
     "--max-turns", "10",
     "--output-format", "json",
   ];
+}
+
+/** What a finished `claude -p --output-format json` run left behind, wherever it ran. */
+export interface ClaudeRunOutcome {
+  code: number | null;
+  signal?: string | null;
+  stdout: string;
+  stderr: string;
+  timedOut: boolean;
+}
+
+/**
+ * Turn a claude run into its result text and cost, or throw a GhostError that says why not.
+ * Every piece of output that ends up in an error message is redacted of `secrets` first.
+ */
+export function interpretClaudeRun(
+  out: ClaudeRunOutcome,
+  opts: { secrets: Array<string | undefined>; timeoutMs: number },
+): { text: string; costUsd?: number } {
+  const clean = (s: string) => redact(s, opts.secrets).trim().slice(-500);
+  if (out.timedOut) throw new GhostError(`claude timed out after ${Math.round(opts.timeoutMs / 1000)}s and was killed`);
+  let data: Record<string, any> | null = null;
+  try {
+    data = JSON.parse(out.stdout.trim());
+  } catch {
+    data = null;
+  }
+  if (out.code !== 0) {
+    const detail = data?.result ? String(data.result) : out.stderr || out.stdout;
+    throw new GhostError(`claude exited with ${out.code ?? out.signal}: ${clean(detail)}`);
+  }
+  if (!data || typeof data !== "object") throw new GhostError(`claude printed unparseable output: ${clean(out.stdout) || "(empty)"}`);
+  if (data.is_error) throw new GhostError(`claude reported an error (${data.subtype ?? "unknown"}): ${clean(String(data.result ?? ""))}`);
+  if (typeof data.result !== "string") throw new GhostError("claude output has no result text");
+  return { text: data.result, costUsd: typeof data.total_cost_usd === "number" ? data.total_cost_usd : undefined };
 }
 
 export interface LocalRunnerOptions {
@@ -135,27 +180,11 @@ export class LocalRunner implements GhostRunner {
         SEANCE_GHOST: "1",
       };
       const out = await this.spawnClaude(ghostArgs(prompt, input.session.sessionId, this.model), cwd, env);
-      const clean = (s: string) => redact(s, [ghostsKey]).trim().slice(-500);
-
-      if (out.timedOut) throw new GhostError(`claude timed out after ${Math.round(this.timeoutMs / 1000)}s and was killed`);
-      let data: Record<string, any> | null = null;
-      try {
-        data = JSON.parse(out.stdout.trim());
-      } catch {
-        data = null;
-      }
-      if (out.code !== 0) {
-        const detail = data?.result ? String(data.result) : out.stderr || out.stdout;
-        throw new GhostError(`claude exited with ${out.code ?? out.signal}: ${clean(detail)}`);
-      }
-      if (!data || typeof data !== "object") throw new GhostError(`claude printed unparseable output: ${clean(out.stdout) || "(empty)"}`);
-      if (data.is_error) throw new GhostError(`claude reported an error (${data.subtype ?? "unknown"}): ${clean(String(data.result ?? ""))}`);
-      if (typeof data.result !== "string") throw new GhostError("claude output has no result text");
+      const { text, costUsd } = interpretClaudeRun(out, { secrets: [ghostsKey], timeoutMs: this.timeoutMs });
 
       // 4. Parse and verify against the ORIGINAL snapshot, never the fork.
-      const parsed = parseGhostOutput(data.result);
+      const parsed = parseGhostOutput(text);
       const quotes = await verifyQuotes(parsed.quotes, input.transcriptLocalPath);
-      const costUsd = typeof data.total_cost_usd === "number" ? data.total_cost_usd : undefined;
       this.log(`run ${runId}: answered via local claude in ${Date.now() - started}ms, cost $${costUsd ?? "?"}, ${quotes.filter((q) => q.verified).length}/${quotes.length} quotes verified`);
       return { ...parsed, quotes, runId, runner: "local", durationMs: Date.now() - started, costUsd };
     } catch (e) {
