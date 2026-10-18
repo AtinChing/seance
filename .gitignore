@@ -1,0 +1,6 @@
+.env
+.seance/
+node_modules/
+*.log
+demo/payments-repo/
+/tmp/
