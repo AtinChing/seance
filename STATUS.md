@@ -1,6 +1,6 @@
 # Séance: status
 
-_Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Open items: one question typed into Cursor's chat (M7), and one interactive M4 run where Atin approves the folder-trust prompt._
+_Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Only open item: one question typed into Cursor's chat (M7)._
 
 **Tagline:** Email a dead agent. It answers.
 
@@ -12,7 +12,7 @@ _Last updated: 2026-10-18 02:40. **Every milestone, M0–M8, passes live.** Open
 | M1 | Contracts and scaffold | ✅ done |
 | M2 | Parallel build | ✅ done |
 | M3 | Core end to end | ✅ **passes live**: Gmail → ghost → threaded reply in 6 s, 3/3 ✓ quotes |
-| M4 | Hook self-onboarding | ✅ **passes live**: agent asks the ghost and declines; hook blocks direct edits; normal edits untouched |
+| M4 | Hook self-onboarding | ✅ **passes live**, headless and **in a real interactive session**: agent asks the ghost (no approval prompt), reproduces 0.25 → 2 charges, declines and offers options; hook blocks direct edits; normal edits untouched |
 | M5 | Blaxel runner + gateway | ✅ **passes live**: Gmail → Blaxel sandbox ghost → reply in 30 s, 3/3 ✓, $0.10; key never in the sandbox; leak smoke refused. **`GHOST_RUNNER=blaxel` is now on** |
 | M6 | InsForge registry | ✅ **passes live**: `REGISTRY=insforge` is now on; Gmail question answered 4/4 ✓; the dashboard shows `sessions` (5), `questions` (11) and the `transcripts` bucket (5 snapshots) |
 | M7 | MCP server | ✅ **deployed** at `https://wild-wave-4jlxe.run.mcp-use.com/mcp` (bearer token required); real Claude Code used all 3 tools against it; the **Cursor IDE connected and listed the tools** (added to `~/.cursor/mcp.json`). Left: type one question into Cursor's chat |
@@ -75,7 +75,6 @@ Backup if email misbehaves: `seance ask src/retry.ts:1 "why 0.37?"` (inside the 
 | **Ask Primitive for `send_to_known_addresses`** | Without it, replies to judges' own addresses are refused | Ask the Primitive team (sponsor) at the hackathon |
 | **Redeploy the MCP when the tunnel URL changes** | The deployed MCP calls `PUBLIC_URL` | After updating `PUBLIC_URL` in `.env`: `cd mcp && npm run deploy:manufact` (redeploys the linked server with the new URL) |
 | Ask one question in Cursor | Cursor is connected but no tool call has been made from it yet | Already in `~/.cursor/mcp.json` (backup: `~/.cursor/mcp.json.bak-before-seance`). In Cursor's agent chat: "Use the seance tools: who wrote line 1 of src/retry.ts in payments-repo, and can it be lowered to 0.25?" The `cursor-agent` CLI needs `cursor-agent login` first, and it ignored the config's `headers` (401) |
-| Trust the demo repo in Claude Code once | Interactive Claude Code asks "Do you trust this folder?" the first time | Open `claude` in `~/seance-demo/payments-repo` and pick "Yes, I trust this folder". `seance init` now pre-approves the read-only `seance ask`/`seance whois` commands, so after that the M4 beat needs no approvals |
 | Restart tunnel + server | Background processes from the build session may not survive | "Start everything" above |
 
 ---
@@ -169,6 +168,7 @@ Three fresh headless sessions in `~/seance-demo/payments-repo` (acceptEdits, Bas
 1. **"change the retry delay to 0.25"** (the exact demo prompt). The agent read the Séance skill, checked the commit trailer, ran `seance ask src/retry.ts:1 "Why is RETRY_BASE_DELAY set to 0.37 …"` **before** editing, reproduced 0.25 → 2 charges itself, and declined: "I didn't change it. At 0.25 the code double-charges the customer", offering three options. `retry.ts` unchanged. (Self-onboarding via the skill; the hook didn't need to fire.)
 2. **Hook path:** with the asked-marker cleared, a session told to "Use the Edit tool right now … to 0.25" was **blocked by the pre-edit hook**, ran the printed `seance ask`, got "0.25 causes double charges" with verified quotes, and backed off: "I haven't changed RETRY_BASE_DELAY; it's still 0.37."
 3. **Negative:** editing human-written `README.md` went straight through (no block). Reverted.
+4. **Interactive (02:35):** a real `claude "change the retry delay to 0.25"` session in the Terminal (auto mode, folder trusted once): "0.37 is an oddly specific number, and the session that wrote it can still be asked, so I'll check with it before changing anything" → `seance ask` (pre-approved) → reran the experiment (0.25 → 2 charges, 0.37 → 1) → kept 0.37 and offered: keep + comment (recommended), change anyway, or fix the timing. About 70 s.
 
 Demo reset between runs: delete the asked-marker so the hook blocks again:
 ```bash
